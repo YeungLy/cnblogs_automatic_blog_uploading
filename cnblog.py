@@ -65,14 +65,17 @@ def create_cfg():
     '''
     创建配置
     '''
-    while True:
-        cfg = {}
-        for item in [("url", "metaWeblog url, 博客设置中有\
-            ('https://rpc.cnblogs.com/metaweblog/blogaddress')"),
-                     ("appkey", "Blog地址名('blogaddress')"),
-                     ("usr", "登录用户名"),
-                     ("passwd", "登录密码")]:
-            cfg[item[0]] = input("输入" + item[1])
+    cfg = {}
+        #for item in [("url", "metaWeblog url, 博客设置中有\
+        #    ('https://rpc.cnblogs.com/metaweblog/blogaddress')"),
+        #             ("appkey", "Blog地址名('blogaddress')"),
+    cfg['url'] = 'https://rpc.cnblogs.com/metaweblog/notesbyY'
+    cfg['appkey'] = 'notesbyY'
+    cfg['usr'] = 'LunaY'
+
+    max_try = 5
+    success = False
+    for i in range(max_try):
         try:
             server = xmlrpclib.ServerProxy(cfg["url"])
             userInfo = server.blogger.getUsersBlogs(
@@ -80,11 +83,13 @@ def create_cfg():
             print(userInfo[0])
             # {'blogid': 'xxx', 'url': 'xxx', 'blogName': 'xxx'}
             cfg["blogid"] = userInfo[0]["blogid"]
+            success = True
             break
         except:
             print("发生错误！")
-    with open(cfg_path, "w", encoding="utf-8") as f:
-        json.dump(cfg, f, indent=4, ensure_ascii=False)
+    if success:
+        with open(cfg_path, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=4, ensure_ascii=False)
 
 
 url = appkey = blogid = usr = passwd = ""
@@ -142,6 +147,7 @@ def post_art(path, publish=True):
     with open(mdfile, "r", encoding="utf-8") as f:
         post = dict(description=f.read(), title=title)
         post["categories"] = ["[Markdown]"]
+        print('processing title:', title)
 
         # 判断是否发布
         if not publish:  # 不发布
@@ -168,8 +174,8 @@ def post_art(path, publish=True):
                 print("Update:[title=%s][postid=%s][publish=%r]" %
                       (title, title2id[title], publish))
 
-                filepath_ = os.path.join('./articles/', f'{title}.md')
-                os.remove(filepath_)
+                #filepath_ = os.path.join('./articles/', f'{title}.md')
+                #os.remove(filepath_)
 
                 return (title, title2id[title], publish)
 
@@ -178,8 +184,8 @@ def post_art(path, publish=True):
                 print("New:[title=%s][postid=%s][publish=%r]" %
                       (title, postid, publish))
 
-                filepath_ = os.path.join('./articles/', f'{title}.md')
-                os.remove(filepath_)
+                #filepath_ = os.path.join('./articles/', f'{title}.md')
+                #os.remove(filepath_)
 
                 return (title, postid, publish)
 
@@ -219,15 +225,18 @@ if __name__ == "__main__":
             elif sys.argv[1] == "config":
                 create_cfg()
                 get_cfg()
+        #TODO: 配置插入图片
+
+        #TODO: 分类tag 为什么更新原有博文之后会消失？
 
         # 发布文章
-        for mdfile in glob.glob(art_path + "*.md"):
-            title, postid, publish = post_art(mdfile, True)
-            title_postid_dict[title] = postid
+        #for mdfile in glob.glob(art_path + "*.md"):
+        #    title, postid, publish = post_art(mdfile, True)
+        #    title_postid_dict[title] = postid
 
         # 提交文章不发布
-        for mdfile in glob.glob(unp_path + "*.md"):
-            title, postid, publish = post_art(mdfile, False)
+        #for mdfile in glob.glob(unp_path + "*.md"):
+        #    title, postid, publish = post_art(mdfile, False)
     except KeyboardInterrupt:
         with open('title_postid.json', 'w', encoding='utf8') as fw:
             json.dump(title_postid_dict, fw)
